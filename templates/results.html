@@ -1,11 +1,113 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Prediction Result</title>
+    <title>Activity Recognition Result</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(120deg, #1e1e1e, #2b2b2b);
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 70px auto;
+            background: rgba(255, 255, 255, 0.07);
+            padding: 50px;
+            border-radius: 22px;
+            box-shadow: 0 0 35px rgba(0,0,0,0.45);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 42px;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+        }
+
+        .dataset {
+            text-align: center;
+            font-size: 18px;
+            color: #cccccc;
+            margin-bottom: 30px;
+        }
+
+        .activity {
+            text-align: center;
+            font-size: 64px;
+            font-weight: bold;
+            color: #4cff4c;
+            margin: 25px 0;
+        }
+
+        .confidence {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 35px;
+        }
+
+        .box {
+            background: rgba(0, 0, 0, 0.35);
+            padding: 25px 30px;
+            border-radius: 16px;
+            font-size: 18px;
+            line-height: 1.7;
+        }
+
+        .box b {
+            color: #4da6ff;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 35px;
+        }
+
+        a {
+            color: #4da6ff;
+            font-size: 18px;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
+
 <body>
-    <h2>Prediction Result</h2>
-    <p><strong>Predicted Class:</strong> {{ prediction }}</p>
-    <a href="/">Try Another</a>
+
+    <div class="container">
+        <h1>🧠 Activity Recognition Result</h1>
+
+        <div class="dataset">
+            Dataset Used: <b>{{ dataset }}</b>
+        </div>
+
+        <div class="activity">
+            {{ activity }}
+        </div>
+
+        <div class="confidence">
+            Predicted with <b>{{ confidence }}%</b> confidence
+        </div>
+
+        <div class="box">
+            <b>How to understand this result:</b><br><br>
+
+            • The system analyzed motion sensor readings such as acceleration and gyroscope values.<br>
+            • A Random Forest machine learning model classified the movement pattern.<br>
+            • The predicted activity corresponds to <b>{{ activity }}</b>.<br><br>
+
+            <b>Model Explanation:</b><br>
+            {{ explanation }}
+        </div>
+
+        <div class="footer">
+            <a href="/">🔄 Try Another Prediction</a>
+        </div>
+    </div>
+
 </body>
 </html>
