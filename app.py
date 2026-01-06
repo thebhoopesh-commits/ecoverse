@@ -6,64 +6,103 @@ from sklearn.preprocessing import LabelEncoder
 
 app = Flask(__name__)
 
-# ================= LOAD & TRAIN MODELS =================
+
 
 def train_gait_model():
     df = pd.read_csv(r"E:\datasets for the hackatho\gait_fall_dataset.csv")
+
+    
     X = df.drop(columns=['label'])
-    y = LabelEncoder().fit_transform(df['label'])
+    y_raw = df['label']
 
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    
+    le = LabelEncoder()
+    y = le.fit_transform(y_raw)
+
+    
+    model = RandomForestClassifier(
+        n_estimators=100,
+        random_state=42
+    )
     model.fit(X, y)
-    return model, X.columns.tolist()
 
-def train_har_model():
-    df = pd.read_csv(r"E:\datasets for the hackatho\test.csv")
-    X = df.drop(columns=['Activity'])
-    y = LabelEncoder().fit_transform(df['Activity'])
+    print("✅ Model trained successfully")
+    print("📌 Encoded labels (index → activity):")
+    for i, label in enumerate(le.classes_):
+        print(f"   {i} → {label}")
 
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X, y)
-    return model, X.columns.tolist()
+    return model, le, X.columns.tolist()
 
-def train_motion_model():
-    df = pd.read_csv(r"E:\datasets for the hackatho\data_subjects_info.csv")
-    X = df.drop(columns=['gender'])
-    y = LabelEncoder().fit_transform(df['gender'])
 
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X, y)
-    return model, X.columns.tolist()
 
-print("🔄 Training models from CSV...")
+gait_model, gait_le, gait_features = train_gait_model()
 
-gait_model, gait_features = train_gait_model()
-har_model, har_features = train_har_model()
-motion_model, motion_features = train_motion_model()
 
-print("✅ Models trained successfully")
 
-# ================= FLASK ROUTES =================
+LABEL_MEANING = {
+    0: "Standing",
+    1: "Walking",
+    2: "Sitting",
+    3: "Fall"
+}
+
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html", features=gait_features)
+
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    dataset = request.form["dataset"]
-    features = request.form["features"]
+    try:
+        
+        features_input = request.form.get("features")
 
-    input_features = np.array(features.split(","), dtype=float).reshape(1, -1)
+        
+        values = np.array(
+            features_input.split(","), dtype=float
+        ).reshape(1, -1)
 
-    if dataset == "gait":
-        prediction = gait_model.predict(input_features)[0]
-    elif dataset == "har":
-        prediction = har_model.predict(input_features)[0]
-    else:
-        prediction = motion_model.predict(input_features)[0]
+        
+        pred_num = gait_model.predict(values)[0]
 
-    return render_template("results.html", prediction=prediction)
+        
+        activity = LABEL_MEANING.get(pred_num, "Unknown Activity")
+
+        # Prediction confidence
+        probabilities = gait_model.predict_proba(values)[0]
+        confidence = round(max(probabilities) * 100, 2)
+
+        
+        explanation = explain_activity(activity)
+
+        return render_template(
+            "results.html",
+            activity=activity,
+            confidence=confidence,
+            explanation=explanation
+        )
+
+    except Exception as e:
+        return f" Error: {str(e)}"
+
+
+
+
+def explain_activity(activity):
+    explanations = {
+        "Walking": "Moderate acceleration with smooth and periodic motion patterns.",
+        "Sitting": "Very low acceleration values indicating minimal body movement.",
+        "Standing": "Stable posture with negligible motion over time.",
+        "Fall": "Sudden spike in acceleration followed by rapid inactivity."
+    }
+
+    return explanations.get(
+        activity,
+        "The activity was detected based on motion sensor patterns."
+    )
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
