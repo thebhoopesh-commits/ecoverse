@@ -1,24 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>ML Activity Recognition</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-    <h1>Activity Recognition System</h1>
+<form action="/predict" method="POST">
 
-    <form action="/predict" method="post">
-        <label>Select Dataset</label>
-        <select name="dataset">
-            <option value="gait">Gait Fall Detection</option>
-            <option value="har">UCI HAR</option>
-            <option value="motion">MotionSense</option>
-        </select>
+    <label>Select Dataset</label>
+    <select name="dataset">
+        <option value="gait">Gait Fall Detection</option>
+        <option value="har">UCI HAR (Smartphones)</option>
+        <option value="motion">MotionSense</option>
+    </select>
 
-        <label>Enter Features (comma separated)</label>
-        <input type="text" name="features" required>
+    <br><br>
 
-        <button type="submit">Predict</button>
-    </form>
-</body>
-</html>
+    <label>Enter Sensor Values (comma separated)</label>
+    <input type="text" name="features" required>
+
+    <br><br>
+    <button type="submit">Predict Activity</button>
+</form>
